@@ -262,7 +262,7 @@
 
         <div class="nav-group" style="margin-bottom: 10px;">
             <button id="voice-toggle" onclick="toggleVoice()" style="background:rgba(0, 210, 255, 0.05); border:1px solid var(--border); color:var(--primary); font-size:10px; padding:12px; border-radius:10px; cursor:pointer; width:100%; transition: 0.3s; font-weight:700; display:flex; align-items:center; gap:10px; justify-content:center;">
-                <i class="fas fa-volume-up"></i> VOZ: LIGADA
+                <i class="fas fa-volume-up"></i> VOZ: LIGADO
             </button>
         </div>
 
@@ -498,7 +498,7 @@
         function toggleVoice() { 
             voiceOn = !voiceOn; 
             const btn = document.getElementById('voice-toggle');
-            btn.innerHTML = voiceOn ? '<i class="fas fa-volume-up"></i> VOZ: LIGADA' : '<i class="fas fa-volume-mute"></i> VOZ: DESLIGADA';
+            btn.innerHTML = voiceOn ? '<i class="fas fa-volume-up"></i> VOZ: LIGADO' : '<i class="fas fa-volume-mute"></i> VOZ: DESLIGADO';
             btn.style.color = voiceOn ? 'var(--primary)' : 'var(--text-dim)';
         }
 
