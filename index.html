@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ANTIPOLLUCION | Sensor v1.0</title>
+    <title>ANTIPOLLUCION | Enterprise Control v26.0</title>
     
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -52,7 +52,6 @@
             transition: transform 0.3s ease, margin-left 0.3s ease;
         }
 
-        /* Classe para fechar a barra lateral */
         aside.closed {
             transform: translateX(-100%);
             margin-left: -280px;
@@ -125,7 +124,6 @@
             z-index: 50;
         }
 
-        /* BOTÃO DE MENU (ABRIR/FECHAR) */
         .mobile-toggle {
             display: flex;
             background: none;
@@ -203,11 +201,11 @@
         .audit-table th { text-align: left; padding: 18px; background: rgba(255,255,255,0.02); color: var(--text-dim); border-bottom: 1px solid var(--border); }
         .audit-table td { padding: 18px; border-bottom: 1px solid rgba(255,255,255,0.01); font-family: 'JetBrains Mono'; }
 
-        /* ============================================================
-           AJUSTES RESPONSIVOS (MOBILE)
-           ============================================================ */
+        /* --- AJUSTES RESPONSIVOS --- */
         @media (max-width: 1024px) {
-            aside { position: fixed; height: 100vh; }
+            aside { position: fixed; height: 100vh; transform: translateX(-100%); margin-left: 0; }
+            aside.closed { transform: translateX(-100%); margin-left: 0; }
+            aside:not(.closed) { transform: translateX(0); }
             .grid-master { grid-template-columns: 1fr 1fr; }
             .card-span-2, .card-full { grid-column: span 2; }
             header { padding: 15px 25px; }
@@ -217,10 +215,9 @@
             .grid-master { grid-template-columns: 1fr; }
             .card-span-2, .card-full { grid-column: span 1; }
             .data-val { font-size: 32px; }
-            .nav-label, #voice-toggle { display: none; }
+            .nav-label { display: none; }
         }
 
-        /* PRINT PDF */
         @media print {
             @page { size: portrait; margin: 20mm; }
             body { background: white !important; color: black !important; display: block; overflow: visible; height: auto; }
@@ -243,9 +240,9 @@
 </head>
 <body onclick="desbloquearAudio()">
 
-    <aside id="sidebar">
+    <aside id="sidebar" class="closed">
         <div class="brand-box">
-            <i class="fas fa-atom"></i>
+            <i class="fas fa-microchip"></i> 
             <span>ANTIPOLLUCION</span>
         </div>
 
@@ -265,7 +262,7 @@
             <div style="font-size: 10px; color: var(--text-dim); font-weight: bold; margin-bottom: 8px;">HARDWARE ATIVO</div>
             <div style="color: var(--primary); font-weight: 800; font-size: 13px;">ANTIPOLLUCION </div>
             <div style="font-size: 9px; color: var(--text-dim); margin-top: 5px;">SENSOR | v1.0</div>
-            <button id="voice-toggle" onclick="toggleVoice()" style="margin-top:10px; background:none; border:1px solid var(--border); color:var(--text-dim); font-size:9px; padding:6px; border-radius:6px; cursor:pointer; width:100%"><i class="fas fa-volume-up"></i> VOZ: LIGADA</button>
+            <button id="voice-toggle" onclick="toggleVoice()" style="margin-top:10px; background:none; border:1px solid var(--border); color:var(--primary); font-size:9px; padding:6px; border-radius:6px; cursor:pointer; width:100%; transition: 0.3s;"><i class="fas fa-volume-up"></i> VOZ: LIGADA</button>
         </div>
     </aside>
 
@@ -379,7 +376,10 @@
         let statsPie = { excelente: 0, moderado: 0, critico: 0 };
         let wdTimer, chartMain, chartStability, chartPie, totalPoints = 0, stableStartTime = Date.now(), voiceOn = true, audioReady = false;
 
-        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('closed'); }
+        function toggleSidebar() { 
+            document.getElementById('sidebar').classList.toggle('closed'); 
+        }
+
         function desbloquearAudio() { audioReady = true; }
 
         function initCharts() {
@@ -448,7 +448,12 @@
         }
 
         function speak(t) { if(!voiceOn) return; const m = new SpeechSynthesisUtterance(t); m.lang = 'pt-BR'; window.speechSynthesis.speak(m); }
-        function toggleVoice() { voiceOn = !voiceOn; document.getElementById('voice-toggle').innerHTML = voiceOn ? '<i class="fas fa-volume-up"></i> VOZ: LIGADA' : '<i class="fas fa-volume-mute"></i> VOZ: DESLIGADA'; }
+        function toggleVoice() { 
+            voiceOn = !voiceOn; 
+            const btn = document.getElementById('voice-toggle');
+            btn.innerHTML = voiceOn ? '<i class="fas fa-volume-up"></i> VOZ: LIGADA' : '<i class="fas fa-volume-mute"></i> VOZ: DESLIGADA';
+            btn.style.color = voiceOn ? 'var(--primary)' : 'var(--text-dim)';
+        }
 
         function addAuditLog(d, h, v) {
             const body = document.getElementById('audit-body');
@@ -461,10 +466,19 @@
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             document.getElementById(id).classList.add('active'); el.classList.add('active');
             document.getElementById('page-title').innerText = el.querySelector('span').innerText;
-            if(window.innerWidth < 1024) toggleSidebar();
+            
+            // Correção para fechar a sidebar automaticamente ao clicar em uma opção (especialmente no mobile)
+            document.getElementById('sidebar').classList.add('closed');
         }
 
-        window.onload = () => { initCharts(); setInterval(() => { document.getElementById('live-time').innerText = new Date().toLocaleString(); }, 1000); };
+        window.onload = () => { 
+            initCharts(); 
+            setInterval(() => { 
+                if(document.getElementById('live-time')) {
+                    document.getElementById('live-time').innerText = new Date().toLocaleString(); 
+                }
+            }, 1000); 
+        };
     </script>
 </body>
 </html>
