@@ -49,6 +49,7 @@
             flex-direction: column; 
             padding: 35px 20px; 
             z-index: 100;
+            transition: 0.3s;
         }
 
         .brand-box { 
@@ -191,42 +192,47 @@
         .audit-table td { padding: 18px; border-bottom: 1px solid rgba(255,255,255,0.01); font-family: 'JetBrains Mono'; }
 
         /* ============================================================
+           MOBILE ADJUSTMENTS (LAYOUT CELULAR)
+           ============================================================ */
+        @media (max-width: 1024px) {
+            body { flex-direction: column; }
+            aside { width: 100%; height: auto; padding: 15px; border-right: none; border-bottom: 1px solid var(--border); }
+            .brand-box { margin-bottom: 15px; justify-content: center; }
+            .nav-group { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-bottom: 0; }
+            .nav-link { font-size: 12px; padding: 10px; margin-bottom: 0; }
+            .nav-label, #voice-toggle { display: none; }
+            header { padding: 15px; flex-direction: column; gap: 10px; text-align: center; }
+            .grid-master { grid-template-columns: 1fr 1fr; }
+            .card-span-2, .card-full { grid-column: span 2; }
+            .page-content { padding: 20px; }
+            .data-val { font-size: 32px; }
+        }
+
+        @media (max-width: 480px) {
+            .grid-master { grid-template-columns: 1fr; }
+            .card-span-2, .card-full { grid-column: span 1; }
+        }
+
+        /* ============================================================
            CSS DE IMPRESSÃO (PDF SIMPLES - ESTILO RELATÓRIO DE TEXTO)
            ============================================================ */
         @media print {
             @page { size: portrait; margin: 20mm; }
             body { background: white !important; color: black !important; display: block; overflow: visible; height: auto; }
-            
-            /* Esconde toda a interface do site */
             aside, header, .nav-group, .status-pill, .chart-wrapper, .visual-bar, #trend-icon, .page-content:not(#logs), .nav-label { display: none !important; }
-            
             main { display: block !important; width: 100%; margin: 0 !important; }
             .page-content { display: block !important; padding: 0 !important; width: 100% !important; }
             #logs { display: block !important; }
-
-            /* Remove estilo de cards e planilhas */
             .card-pro { border: none !important; background: transparent !important; color: black !important; padding: 0 !important; box-shadow: none !important; margin: 0 !important; }
-            
-            /* Tabela vira uma lista simples de texto */
             .audit-table { border: none !important; width: 100% !important; margin-top: 20px !important; }
-            .audit-table thead { display: none !important; } /* Esconde o cabeçalho da tabela */
+            .audit-table thead { display: none !important; } 
             .audit-table tr { display: block !important; border-bottom: 1px solid #ccc !important; padding: 10px 0 !important; }
             .audit-table td { display: inline-block !important; border: none !important; padding: 0 10px 0 0 !important; font-size: 13px !important; color: black !important; }
-            
-            /* Formatação dos dados na linha */
             .audit-table td:nth-child(1):before { content: "DATA: "; font-weight: bold; }
             .audit-table td:nth-child(2):before { content: " | HORA: "; font-weight: bold; }
             .audit-table td:nth-child(3):before { content: " | LEITURA: "; font-weight: bold; }
             .audit-table td:nth-child(4):before { content: " | STATUS: "; font-weight: bold; }
-
-            h3 { 
-                font-size: 24px !important; 
-                text-align: center !important; 
-                margin-bottom: 30px !important; 
-                color: black !important; 
-                border-bottom: 2px solid black !important;
-                padding-bottom: 10px !important;
-            }
+            h3 { font-size: 24px !important; text-align: center !important; margin-bottom: 30px !important; color: black !important; border-bottom: 2px solid black !important; padding-bottom: 10px !important; }
         }
     </style>
 </head>
@@ -384,7 +390,7 @@
 
         function resetWatchdog() {
             clearTimeout(wdTimer);
-            wdTimer = setTimeout(() => { document.getElementById('system-pill').classList.remove('online'); document.getElementById('system-text').innerText = "SENSOR OFFLINE"; document.getElementById('ppm-val').innerText = "---"; }, SYS.watchdog);
+            wdTimer = setTimeout(() => { document.getElementById('system-pill').classList.remove('online'); document.getElementById('system-text').innerText = "SENSOR DESCONECTADO"; document.getElementById('ppm-val').innerText = "---"; }, SYS.watchdog);
         }
 
         function processData(val) {
