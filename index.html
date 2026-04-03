@@ -40,7 +40,7 @@
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
 
-        /* --- SIDEBAR --- */
+        /* --- SIDEBAR RETRÁTIL --- */
         aside {
             width: 280px; 
             background: var(--bg-surface); 
@@ -48,8 +48,14 @@
             display: flex; 
             flex-direction: column; 
             padding: 35px 20px; 
-            z-index: 100;
-            transition: 0.3s ease;
+            z-index: 1000;
+            transition: transform 0.3s ease, margin-left 0.3s ease;
+        }
+
+        /* Classe para fechar a barra lateral */
+        aside.closed {
+            transform: translateX(-100%);
+            margin-left: -280px;
         }
 
         .brand-box { 
@@ -119,6 +125,19 @@
             z-index: 50;
         }
 
+        /* BOTÃO DE MENU (ABRIR/FECHAR) */
+        .mobile-toggle {
+            display: flex;
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-right: 15px;
+        }
+
         .status-pill {
             display: flex; align-items: center; gap: 10px; 
             background: #000; padding: 8px 16px; border-radius: 8px;
@@ -128,32 +147,56 @@
         .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--danger); transition: 0.4s; }
         .online .status-dot { background: var(--success); box-shadow: 0 0 12px var(--success); }
 
-        /* BOTÃO MOBILE */
-        .mobile-toggle {
-            display: none;
-            background: none;
-            border: none;
-            color: var(--primary);
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-
         /* --- GRID --- */
         .page-content { padding: 40px 45px; display: none; max-width: 1600px; width: 100%; margin: 0 auto; }
         .page-content.active { display: block; animation: slideIn 0.4s ease-out; }
         @keyframes slideIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; } }
 
-        .grid-master { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
-        .card-pro { background: var(--bg-card); border: 1px solid var(--border); border-radius: 24px; padding: 25px; position: relative; overflow: hidden; box-shadow: var(--neon-glow); }
+        .grid-master { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 20px; 
+            margin-bottom: 30px; 
+        }
+
+        .card-pro { 
+            background: var(--bg-card); 
+            border: 1px solid var(--border); 
+            border-radius: 24px; 
+            padding: 25px; 
+            position: relative; 
+            overflow: hidden; 
+            box-shadow: var(--neon-glow);
+        }
+
         .card-pro:hover { border-color: var(--primary); transform: translateY(-3px); }
         .card-span-2 { grid-column: span 2; }
         .card-full { grid-column: span 4; }
-        .card-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-        .data-val { font-size: 42px; font-weight: 800; font-family: 'JetBrains Mono'; letter-spacing: -2px; line-height: 1; }
+
+        .card-label { 
+            font-size: 10px; 
+            color: var(--text-dim); 
+            text-transform: uppercase; 
+            font-weight: 700; 
+            margin-bottom: 12px; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+        }
+
+        .data-val { 
+            font-size: 42px; 
+            font-weight: 800; 
+            font-family: 'JetBrains Mono'; 
+            letter-spacing: -2px; 
+            line-height: 1; 
+        }
+
         .data-unit { font-size: 13px; color: var(--text-dim); margin-left: 5px; font-weight: 400; }
 
         .visual-bar { height: 6px; background: #1f2937; border-radius: 10px; margin-top: 15px; overflow: hidden; }
         #dynamic-bar { height: 100%; width: 0%; background: var(--primary); transition: 1s; }
+
         .chart-wrapper { height: 420px; width: 100%; margin-top: 20px; }
 
         .audit-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 20px; }
@@ -161,29 +204,23 @@
         .audit-table td { padding: 18px; border-bottom: 1px solid rgba(255,255,255,0.01); font-family: 'JetBrains Mono'; }
 
         /* ============================================================
-           AJUSTES MOBILE (CELULAR)
+           AJUSTES RESPONSIVOS (MOBILE)
            ============================================================ */
-        @media (max-width: 992px) {
-            body { flex-direction: column; }
-            aside {
-                position: fixed; left: -280px; top: 0; bottom: 0;
-                box-shadow: 10px 0 30px rgba(0,0,0,0.5);
-            }
-            aside.mobile-open { left: 0; }
-            .mobile-toggle { display: block; }
-            .grid-master { grid-template-columns: repeat(2, 1fr); }
+        @media (max-width: 1024px) {
+            aside { position: fixed; height: 100vh; }
+            .grid-master { grid-template-columns: 1fr 1fr; }
             .card-span-2, .card-full { grid-column: span 2; }
-            header { padding: 20px; }
-            .page-content { padding: 20px; }
+            header { padding: 15px 25px; }
         }
 
         @media (max-width: 600px) {
             .grid-master { grid-template-columns: 1fr; }
             .card-span-2, .card-full { grid-column: span 1; }
             .data-val { font-size: 32px; }
+            .nav-label, #voice-toggle { display: none; }
         }
 
-        /* IMPRESSÃO PDF SIMPLES */
+        /* PRINT PDF */
         @media print {
             @page { size: portrait; margin: 20mm; }
             body { background: white !important; color: black !important; display: block; overflow: visible; height: auto; }
@@ -193,7 +230,7 @@
             #logs { display: block !important; }
             .card-pro { border: none !important; background: transparent !important; color: black !important; padding: 0 !important; box-shadow: none !important; margin: 0 !important; }
             .audit-table { border: none !important; width: 100% !important; margin-top: 20px !important; }
-            .audit-table thead { display: none !important; }
+            .audit-table thead { display: none !important; } 
             .audit-table tr { display: block !important; border-bottom: 1px solid #ccc !important; padding: 10px 0 !important; }
             .audit-table td { display: inline-block !important; border: none !important; padding: 0 10px 0 0 !important; font-size: 13px !important; color: black !important; }
             .audit-table td:nth-child(1):before { content: "DATA: "; font-weight: bold; }
@@ -234,8 +271,8 @@
 
     <main>
         <header>
-            <button class="mobile-toggle" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
-            <div>
+            <div style="display: flex; align-items: center;">
+                <button class="mobile-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
                 <h2 id="page-title" style="letter-spacing: -1px; font-weight: 800;">Painel de Controle</h2>
             </div>
             <div class="status-pill offline" id="system-pill">
@@ -294,7 +331,7 @@
             <div class="grid-master">
                 <div class="card-pro">
                     <span class="card-label"><i class="fas fa-stopwatch"></i> Tempo de Atividade</span>
-                    <div class="data-val" id="uptime-val">0</div><span class="data-unit">min online</span>
+                    <div class="data-val" id="uptime-val">0</div><span class="data-unit">minutos online</span>
                 </div>
                 <div class="card-pro">
                     <span class="card-label"><i class="fas fa-triangle-exclamation"></i> Fator de Risco</span>
@@ -308,7 +345,6 @@
                     <span class="card-label"><i class="fas fa-database"></i> Integridade</span>
                     <div class="data-val" id="total-readings">0</div><span class="data-unit">Pontos</span>
                 </div>
-
                 <div class="card-pro card-span-2">
                     <span class="card-label">Gráfico de Ruído e Oscilação</span>
                     <div style="height: 350px;"><canvas id="chart-stability"></canvas></div>
@@ -343,7 +379,7 @@
         let statsPie = { excelente: 0, moderado: 0, critico: 0 };
         let wdTimer, chartMain, chartStability, chartPie, totalPoints = 0, stableStartTime = Date.now(), voiceOn = true, audioReady = false;
 
-        function toggleMenu() { document.getElementById('sidebar').classList.toggle('mobile-open'); }
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('closed'); }
         function desbloquearAudio() { audioReady = true; }
 
         function initCharts() {
@@ -357,12 +393,17 @@
         client.on('connect', () => { client.subscribe(SYS.topic); document.getElementById('system-pill').classList.add('online'); document.getElementById('system-text').innerText = "ESTAÇÃO CONECTADA"; });
         client.on('message', (t, m) => { const val = parseInt(m.toString()); if(!isNaN(val)) { processData(val); resetWatchdog(); } });
 
+        function resetWatchdog() {
+            clearTimeout(wdTimer);
+            wdTimer = setTimeout(() => { document.getElementById('system-pill').classList.remove('online'); document.getElementById('system-text').innerText = "SENSOR DESCONECTADO"; document.getElementById('ppm-val').innerText = "---"; }, SYS.watchdog);
+        }
+
         function processData(val) {
             const now = new Date(), timeStr = now.toLocaleTimeString(), dateStr = now.toLocaleDateString();
             totalPoints++; document.getElementById('total-readings').innerText = totalPoints;
             document.getElementById('uptime-val').innerText = Math.floor((Date.now() - startTime) / 60000);
 
-            document.getElementById('ppm-val').innerText = val.toString().padStart(3, '0');
+            document.getElementById('ppm-val').innerText = val;
             document.getElementById('dynamic-bar').style.width = Math.min(100, (val/600)*100) + "%";
             document.getElementById('dynamic-bar').style.background = val > SYS.limit ? "#da3633" : "#00d2ff";
 
@@ -420,15 +461,10 @@
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             document.getElementById(id).classList.add('active'); el.classList.add('active');
             document.getElementById('page-title').innerText = el.querySelector('span').innerText;
-            if(window.innerWidth < 992) toggleMenu();
+            if(window.innerWidth < 1024) toggleSidebar();
         }
 
-        function resetWatchdog() { clearTimeout(wdTimer); wdTimer = setTimeout(() => { document.getElementById('system-pill').classList.remove('online'); }, SYS.watchdog); }
-
-        window.onload = () => { 
-            initCharts(); 
-            setInterval(() => { document.getElementById('live-time').innerText = new Date().toLocaleString(); }, 1000); 
-        };
+        window.onload = () => { initCharts(); setInterval(() => { document.getElementById('live-time').innerText = new Date().toLocaleString(); }, 1000); };
     </script>
 </body>
 </html>
