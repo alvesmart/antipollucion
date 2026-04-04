@@ -237,7 +237,17 @@
             .audit-table td:nth-child(3):before { content: " | LEITURA: "; font-weight: bold; }
             .audit-table td:nth-child(4):before { content: " | STATUS: "; font-weight: bold; }
             h3 { font-size: 24px !important; text-align: center !important; margin-bottom: 30px !important; color: black !important; border-bottom: 2px solid black !important; padding-bottom: 10px !important; }
+
         }
+            .audit-container {
+                width: 100%;
+                overflow-x: auto;
+        }
+
+            .audit-table {
+                min-width: 600px;
+        }
+
     </style>
 </head>
 <body onclick="desbloquearAudio()">
@@ -363,7 +373,7 @@
         <div id="logs" class="page-content">
             <div class="card-pro card-full">
                 <h3>RELATÓRIO DE AUDITORIA AMBIENTAL - ANTIPOLLUCION</h3>
-                <div class="audit-container">
+                <div class="audit-container" style="overflow-x: auto;">
                     <table class="audit-table">
                         <thead>
                             <tr>
@@ -383,6 +393,8 @@
         let statsPie = { excelente: 0, moderado: 0, critico: 0 };
         let wdTimer, chartMain, chartStability, chartPie, totalPoints = 0, stableStartTime = Date.now(), voiceOn = true, audioReady = false;
         let lastStatus = "";
+        let mqttConnected = false;
+        let sensorOnline = false;
 
         function toggleSidebar() { 
             document.getElementById('sidebar').classList.toggle('closed'); 
@@ -396,11 +408,51 @@
             chartStability = new Chart(document.getElementById('chart-stability'), { type: 'line', data: { labels, datasets: [{ data: sensorHistory, borderColor: '#7000ff', tension: 0.1, pointRadius: 0 }] }, options: commonOpt });
             chartPie = new Chart(document.getElementById('chart-pie'), { type: 'doughnut', data: { labels: ['Excelente', 'Moderado', 'Crítico'], datasets: [{ data: [1, 1, 1], backgroundColor: ['#238636', '#d29922', '#da3633'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '80%', plugins: { legend: { position: 'bottom', labels: { color: '#8b949e' } } } } });
         }
+        function updateSystemStatus() {
+    const text = document.getElementById('system-text');
+    const pill = document.getElementById('system-pill');
 
+    if (!mqttConnected) {
+        text.innerText = "MQTT DESCONECTADO";
+        pill.classList.remove('online');
+        pill.classList.add('offline');
+    } else if (!sensorOnline) {
+        text.innerText = "MQTT OK | AGUARDANDO SENSOR...";
+        pill.classList.remove('offline');
+        pill.classList.add('online');
+    } else {
+        text.innerText = "SISTEMA OPERANDO";
+        pill.classList.remove('offline');
+        pill.classList.add('online');
+    }
+    
+    }
+        
         const client = mqtt.connect(SYS.broker);
+
+            // ✅ CONECTADO
         client.on('connect', () => { 
-            client.subscribe(SYS.topic); 
-            document.getElementById('system-text').innerText = "CONECTADO AO SERVIDOR"; 
+            mqttConnected = true;
+            client.subscribe(SYS.topic);
+            updateSystemStatus();
+        });
+
+            // 🔄 RECONECTANDO
+        client.on('reconnect', () => {
+            mqttConnected = false;
+            updateSystemStatus();
+        });
+
+            // ❌ OFFLINE
+        client.on('offline', () => {
+            mqttConnected = false;
+            updateSystemStatus();
+        });
+
+       client.on('reconnect', () => {
+            mqttConnected = false;
+            sensorOnline = false;
+            updateSystemStatus();
         });
 
         client.on('message', (t, m) => { 
@@ -408,8 +460,11 @@
             if(!isNaN(val)) { 
                 if(!sensorFound) {
                     sensorFound = true;
-                    document.getElementById('system-pill').classList.add('online');
                 }
+
+                sensorOnline = true;
+                updateSystemStatus();
+
                 processData(val); 
                 resetWatchdog(); 
             } 
@@ -417,15 +472,17 @@
 
         function resetWatchdog() {
             clearTimeout(wdTimer);
-            document.getElementById('system-pill').classList.remove('offline');
-            document.getElementById('system-pill').classList.add('online');
-            document.getElementById('system-text').innerText = "SENSOR ONLINE";
-            wdTimer = setTimeout(() => { 
-                document.getElementById('system-pill').classList.remove('online'); 
-                document.getElementById('system-pill').classList.add('offline');
-                document.getElementById('system-text').innerText = "SENSOR DESCONECTADO"; 
-                document.getElementById('ppm-val').innerText = "---"; 
-            }, SYS.watchdog);
+
+            sensorOnline = true;
+            updateSystemStatus();
+
+            wdTimer = setTimeout(() => {
+            sensorOnline = false;
+            updateSystemStatus();
+
+            document.getElementById('ppm-val').innerText = "---";
+        }, SYS.watchdog);
+        
         }
 
         function processData(val) {
@@ -458,14 +515,20 @@
             }
 
             // Lógica de Fator de Risco e AQI
-            const riskLabel = document.getElementById('risk-factor');
-            let status = "EXCELENTE";
+          const riskLabel = document.getElementById('risk-factor');
+          let status = "EXCELENTE";
+
             if(val > SYS.limit) {
+
+            if(voiceOn && audioReady && lastStatus !== "CRÍTICO") {
+                speak("Alerta, nível crítico.");
+            }
+
                 status = "CRÍTICO";
                 statsPie.critico++;
                 riskLabel.innerText = "ALTO";
                 riskLabel.style.color = "var(--danger)";
-                if(voiceOn && audioReady && val > lastPPM + 10) speak(`Alerta, nível crítico.`);
+
             } else if (val > 100) {
                 status = "MODERADO";
                 statsPie.moderado++;
